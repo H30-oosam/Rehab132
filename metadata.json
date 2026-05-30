@@ -1,0 +1,6 @@
+{
+  "name": "شركة رحاب للتسويق",
+  "description": "نظام لوحة تحكم وإدارة عملاء متكامل باللغة العربية وبالجنيه المصري لإدارة الحملات والمبيعات والمدفوعات لشركة رحاب للتسويق.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
