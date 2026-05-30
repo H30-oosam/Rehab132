@@ -12,14 +12,38 @@ import CampaignsView from "./components/CampaignsView";
 import PaymentsView from "./components/PaymentsView";
 import SettingsView from "./components/SettingsView";
 
+// Import the new views for Academy, Automations, Funnel, and Booking
+import AcademyView from "./components/AcademyView";
+import AutomationsView from "./components/AutomationsView";
+import CheckoutFunnelView from "./components/CheckoutFunnelView";
+import ConsultationsView from "./components/ConsultationsView";
+
 import { 
   initialClients, 
   initialMessages, 
   initialTasks, 
   initialCampaigns, 
-  initialPayments 
+  initialPayments,
+  initialCourses,
+  initialStudents,
+  initialAutoRules,
+  initialAutoLogs,
+  initialCheckoutPages,
+  initialConsultations
 } from "./data/mockData";
-import { Client, Message, Task, Campaign, Payment } from "./types";
+import { 
+  Client, 
+  Message, 
+  Task, 
+  Campaign, 
+  Payment,
+  Course,
+  StudentEnrollment,
+  AutoRule,
+  AutoLog,
+  CheckoutPage,
+  ConsultationBooking
+} from "./types";
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<string>("dashboard");
@@ -32,8 +56,65 @@ export default function App() {
   const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
   const [payments, setPayments] = useState<Payment[]>(initialPayments);
 
+  // New Application Data states for the expanded suite
+  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [students, setStudents] = useState<StudentEnrollment[]>(initialStudents);
+  const [autoRules, setAutoRules] = useState<AutoRule[]>(initialAutoRules);
+  const [autoLogs, setAutoLogs] = useState<AutoLog[]>(initialAutoLogs);
+  const [checkoutPages, setCheckoutPages] = useState<CheckoutPage[]>(initialCheckoutPages);
+  const [consultations, setConsultations] = useState<ConsultationBooking[]>(initialConsultations);
+
   // Modal Control triggered from dashboard to contacts
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+
+  // Simulated WhatsApp & Email automatic notification scheduler dispatcher
+  const triggerNotificationSim = (recipientName: string, eventType: string, eventTitle: string) => {
+    const matchedRule = autoRules.find(r => r.triggerEvent === eventType && r.active);
+    if (!matchedRule) return;
+
+    let text = matchedRule.messageTemplate
+      .replace(/\{\{clientName\}\}/g, recipientName)
+      .replace(/\{\{clientId\}\}/g, "C-" + Math.floor(Math.random() * 900 + 100))
+      .replace(/\{\{courseTitle\}\}/g, eventTitle)
+      .replace(/\{\{service\}\}/g, eventTitle)
+      .replace(/\{\{amount\}\}/g, "3,500")
+      .replace(/\{\{date\}\}/g, new Date().toISOString().split('T')[0])
+      .replace(/\{\{time\}\}/g, "12:00 م");
+
+    const channels: Array<"WhatsApp" | "Email"> = [];
+    if (matchedRule.channel === "WhatsApp" || matchedRule.channel === "Both") channels.push("WhatsApp");
+    if (matchedRule.channel === "Email" || matchedRule.channel === "Both") channels.push("Email");
+
+    const newLogs: AutoLog[] = channels.map((ch, idx) => ({
+      id: "lg_sim_" + Date.now() + "_" + idx,
+      ruleTitle: matchedRule.title,
+      recipientName,
+      recipientContact: ch === "WhatsApp" ? "01012345678" : "client@mail.eg",
+      channel: ch,
+      sentAt: new Date().toISOString().replace("T", " ").substring(0, 19),
+      status: "تم الإرسال",
+      previewText: text.substring(0, 110) + (text.length > 110 ? "..." : "")
+    }));
+
+    setAutoLogs(prev => [...newLogs, ...prev]);
+  };
+
+  // Simulated payment logging hook from Checkouts
+  const handleSimulateNewPayment = (clientName: string, amount: number, service: string) => {
+    const newPayment: Payment = {
+      id: "p_" + Date.now(),
+      clientName,
+      amount,
+      date: new Date().toISOString().split('T')[0],
+      status: "مدفوع",
+      service
+    };
+    setPayments(prev => [newPayment, ...prev]);
+
+    // Fast-trigger automatic notification for payment receipt template
+    triggerNotificationSim(clientName.split(" ")[0], "عند سداد فاتورة", service);
+  };
+
 
   // Calculates unread chats count beautifully
   const unreadCount = messages ? messages.filter(m => m.sender === "client" && !m.isRead).length : 0;
@@ -69,6 +150,42 @@ export default function App() {
             clients={clients}
             messages={messages}
             setMessages={setMessages}
+          />
+        );
+      case "academy":
+        return (
+          <AcademyView 
+            courses={courses}
+            setCourses={setCourses}
+            students={students}
+            setStudents={setStudents}
+            triggerNotificationSim={triggerNotificationSim}
+          />
+        );
+      case "automations":
+        return (
+          <AutomationsView 
+            rules={autoRules}
+            setRules={setAutoRules}
+            logs={autoLogs}
+            setLogs={setAutoLogs}
+            clientsListForMock={clients}
+          />
+        );
+      case "checkout_funnel":
+        return (
+          <CheckoutFunnelView 
+            funnels={checkoutPages}
+            setFunnels={setCheckoutPages}
+            onSimulateNewPayment={handleSimulateNewPayment}
+          />
+        );
+      case "consult_booking":
+        return (
+          <ConsultationsView 
+            consultations={consultations}
+            setConsultations={setConsultations}
+            triggerNotificationSim={triggerNotificationSim}
           />
         );
       case "campaigns":

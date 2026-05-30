@@ -13,7 +13,11 @@ import {
   Menu,
   X,
   TrendingUp,
-  Briefcase
+  Briefcase,
+  GraduationCap,
+  Bot,
+  Smartphone,
+  Calendar
 } from "lucide-react";
 import { useState } from "react";
 
@@ -31,6 +35,10 @@ export default function Sidebar({ currentTab, setCurrentTab, unreadCount, compan
     { id: "dashboard", label: "الرئيسية وتحليل الأداء", icon: LayoutDashboard },
     { id: "contacts", label: "العملاء والمبيعات", icon: Users },
     { id: "conversations", label: "المحادثات المباشرة", icon: MessageSquare, badge: unreadCount },
+    { id: "academy", label: "الأكاديمية والطلاب", icon: GraduationCap },
+    { id: "automations", label: "الأتمتة والرسائل الذكية", icon: Bot },
+    { id: "checkout_funnel", label: "صفحات البيع والـ Checkout", icon: Smartphone },
+    { id: "consult_booking", label: "حجز الجلسات والاستشارات", icon: Calendar },
     { id: "campaigns", label: "الحملات الإعلانية", icon: Megaphone },
     { id: "payments", label: "المدفوعات والفواتير", icon: CreditCard },
     { id: "settings", label: "إعدادات الشركة", icon: SettingsIcon }
